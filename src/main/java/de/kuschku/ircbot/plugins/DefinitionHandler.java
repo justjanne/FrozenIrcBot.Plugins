@@ -38,7 +38,7 @@ public class DefinitionHandler extends ListenerAdapter<PircBotX> {
 			word = word.substring(args.get(0).length() + 1);
 
 			Backend backend = null;
-			JsonObject keys = Client.getConfig(this.getClass()).getAsJsonObject("keys");
+			JsonObject keys = Client.getConfig(this.getClass().getCanonicalName()).getAsJsonObject("keys");
 
 			if (args.get(0).equalsIgnoreCase("def")) {
 				backend = new WordNetBackend(

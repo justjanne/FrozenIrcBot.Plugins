@@ -5,6 +5,8 @@
         "de.kuschku.ircbot.plugins.Magic8BallHandler",
         "de.kuschku.ircbot.plugins.ShipHandler",
         "de.kuschku.ircbot.plugins.TranslationHandler",
-        "de.kuschku.ircbot.plugins.WolframAlphaHandler"
-    ]
+        "de.kuschku.ircbot.plugins.WolframAlphaHandler",
+        "de.kuschku.ircbot.plugins.KeepHandler"
+    ],
+    "name": "Util-Plugins"
 }

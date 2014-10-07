@@ -12,7 +12,42 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
-            </plugin>    
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                <archive>
+                    <manifest>
+                    	<addClasspath>true</addClasspath>
+                    	<classpathPrefix>dependencies/</classpathPrefix>
+                    </manifest>
+            		<manifestEntries>
+                		<Class-Path>dependencies/slf4j-simple-1.7.5.jar</Class-Path>
+            		</manifestEntries>
+                </archive>
+                </configuration>
+         	</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.5.1</version>
+                <executions>
+                	<execution>
+                    	<id>copy-dependencies</id>
+                    	<phase>package</phase>
+                    	<goals>
+	                        <goal>copy-dependencies</goal>
+                    	</goals>
+                    	<configuration>
+	                        <outputDirectory>
+    	                        ${project.build.directory}/dependencies/
+                            </outputDirectory>
+        	            </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 	<dependencies>
@@ -52,6 +87,16 @@
 			<version>1.0.0</version>
 			<scope>system</scope>
       		<systemPath>/home/kuschku/Workspace/projects/ircbot/target/ircbot-1.0.0.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.3.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+			<version>4.3.2</version>
 		</dependency>
 	</dependencies>
 </project>

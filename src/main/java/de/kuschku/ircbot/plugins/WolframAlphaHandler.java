@@ -39,7 +39,7 @@ public class WolframAlphaHandler extends ListenerAdapter<PircBotX> {
 	}
 
 	public static JsonObject getResults(String request) throws IOException {
-		JsonObject keys = Client.getConfig(WolframAlphaHandler.class).getAsJsonObject("keys");
+		JsonObject keys = Client.getConfig(WolframAlphaHandler.class.getCanonicalName()).getAsJsonObject("keys");
 		URL resourceUrl = new URL(URL.replaceAll("%query",URLEncoder.encode(request,"UTF-8")).replaceAll("%key", keys.get("main").getAsString()));
 		HttpURLConnection.setFollowRedirects(true);
 		HttpURLConnection conn = (HttpURLConnection) resourceUrl
