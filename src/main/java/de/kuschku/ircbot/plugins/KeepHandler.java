@@ -47,7 +47,7 @@ public class KeepHandler extends ListenerAdapter<PircBotX> {
 		if (event.getMessage().startsWith("!todo")) {
 			if (event.getUser().getHostmask().equalsIgnoreCase("kuschku.de")) {
 				String text = event.getMessage().substring(event.getMessage().indexOf(" ")).trim();
-				JsonObject response = helper.request("{\"requestHeader\":{\"clientVersion\":{\"major\":\"2\",\"minor\":\"4\",\"build\":\"0\",\"revision\":\"0\"},\"clientPlatform\":\"WEB\"},\"targetVersion\":\"207bf\",\"nodes\":[{\"id\":\""+(Integer.valueOf(Math.round(System.nanoTime()/10000000000)))+"."+(long)(rand.nextDouble()*10000000000L)+"\",\"kind\":\"notes#node\",\"parentId\":\"148e234db8c.bce612d81c7ffd04\",\"sortValue\":-"+(Integer.valueOf(Math.round(System.nanoTime()/1000)))+",\"timestamps\":{\"kind\":\"notes#timestamps\",\"created\":\""+new Timestamp(new Date().getTime()).toString().replace(' ', 'T')+"Z\"},\"type\":\"LIST_ITEM\",\"text\":\""+text+"\",\"checked\":false}]}");
+				JsonObject response = helper.request("{\"requestHeader\":{\"clientVersion\":{\"major\":\"2\",\"minor\":\"4\",\"build\":\"0\",\"revision\":\"0\"},\"clientPlatform\":\"WEB\"},\"targetVersion\":\"207bf\",\"nodes\":[{\"id\":\""+(Integer.valueOf(Math.round(System.nanoTime()/1000)))+"."+(long)(rand.nextDouble()*10000000000L)+"\",\"kind\":\"notes#node\",\"parentId\":\"148e234db8c.bce612d81c7ffd04\",\"sortValue\":-"+(Integer.valueOf(Math.round(System.currentTimeMillis()/10000)))+",\"timestamps\":{\"kind\":\"notes#timestamps\",\"created\":\""+new Timestamp(new Date().getTime()).toString().replace(' ', 'T')+"Z\"},\"type\":\"LIST_ITEM\",\"text\":\""+text+"\",\"checked\":false}]}");
 			} else {
 				event.getUser()
 						.send()
