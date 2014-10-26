@@ -3,6 +3,7 @@ package de.kuschku.ircbot.plugins;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -30,25 +31,36 @@ public class TranslationHandler extends ListenerAdapter<PircBotX> {
 
 	@Override
 	public void onMessage(MessageEvent<PircBotX> event) throws Exception {
-		if(event.getMessage().toLowerCase().startsWith("!trans ") || event.getMessage().toLowerCase().startsWith("!trans:") ) {		
-			String args = event.getMessage().substring("!trans".length());
-			String lang_args = args.substring(0,args.indexOf(" ")).trim();
-			String[] specified_languages = lang_args.split(":");
-			
-			String request = args.substring(args.indexOf(" ")).trim();
-			
-			JsonObject json = getResults(URLEncoder.encode(request,"UTF-8"),specified_languages);
-			String sentence = getSentencesFromJson(json);
-			String langs = formatLangs(getLanguagesFromJson(json));
-			
-				event.getChannel()
-						.send()
-						.message(langs + " " + 
-								new BoldText(sentence).toString());
+		if(event.getMessage().toLowerCase().startsWith("!trans ") || event.getMessage().toLowerCase().startsWith("!trans:") ) {
+			Thread async = new Thread() {
+				@Override
+				public void run() {
+					try {
+						event.getChannel().send().message(executeAction(event.getMessage()));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			async.start();
 		}
 	}
+	
+	static final String executeAction(String input) throws UnsupportedEncodingException, IOException {
+		String args = input.substring("!trans".length());
+		String lang_args = args.substring(0,args.indexOf(" ")).trim();
+		String[] specified_languages = lang_args.split(":");
+		
+		String request = args.substring(args.indexOf(" ")).trim();
+		
+		JsonObject json = getResults(URLEncoder.encode(request,"UTF-8"),specified_languages);
+		String sentence = getSentencesFromJson(json);
+		String langs = formatLangs(getLanguagesFromJson(json));
+		
+		return langs + " " + new BoldText(sentence).toString();
+	}
 
-	public static JsonObject getResults(String request, String[] langs) throws IOException {
+	static final JsonObject getResults(String request, String[] langs) throws IOException {
 		URL resourceUrl;
 		switch (langs.length) {
 		case 1:

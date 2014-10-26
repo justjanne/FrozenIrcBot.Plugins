@@ -8,6 +8,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -151,20 +152,29 @@ public class LinkTitleHandler extends ListenerAdapter<PircBotX> {
 
 		return results.toArray(new String[0]);
 	}
+	
+	static final Optional<String> executeAction(String input) {
+		try {
+			return Optional.of(formatData(getData(getID(getNiceUrl(getPage(input))))));
+		} catch (IOException e) {
+			e.printStackTrace();
+			return Optional.empty();
+		}
+	}
 
 	@Override
 	public void onMessage(MessageEvent<PircBotX> event) throws Exception {
-		String[] results = stringToURLList(event.getMessage());
-		for (String result : results) {
-			try {
-				event.getChannel()
-					.send()
-					.message(
-						formatData(getData(getID(getNiceUrl(getPage(result))))));
-			} catch (MalformedURLException e) {
-				if (!e.getMessage().equalsIgnoreCase("No YouTube link"))
-					throw e;
+		Thread async = new Thread() {
+			@Override
+			public void run() {
+				String[] results = stringToURLList(event.getMessage());
+				for (String result : results) {
+					Optional<String> message = executeAction(result);
+					if (message.isPresent())
+						event.getChannel().send().message(message.get());
+				}
 			}
-		}
+		};
+		async.start();
 	}
 }
