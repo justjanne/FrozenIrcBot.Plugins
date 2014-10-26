@@ -30,44 +30,39 @@ public class DefinitionHandler extends ListenerAdapter<PircBotX> {
 		if (args != null
 				&& (args.get(0).equalsIgnoreCase("def") || args.get(0)
 						.equalsIgnoreCase("ud"))) {		
-			Thread async = new Thread(){
-				@Override
-				public void run() {
-					int amount = 3;
-					if (event.getChannel().isChannelPrivate())
-						amount = 20;
+			int amount = 3;
+			if (event.getChannel().isChannelPrivate())
+				amount = 20;
 
-					String word = String.join(" ", args.asList());
-					word = word.substring(args.get(0).length() + 1);
+			String word = String.join(" ", args.asList());
+			word = word.substring(args.get(0).length() + 1);
 
-					Backend backend = null;
-					JsonObject keys = Client.getConfig(this.getClass().getCanonicalName()).getAsJsonObject("keys");
-					
-					if (args.get(0).equalsIgnoreCase("def")) {
-						backend = new WordNetBackend(
-								keys.get("wordnet").getAsString());
-					} else if (args.get(0).equalsIgnoreCase("ud")) {
-						backend = new UrbanBackend(
-								keys.get("urbandictionary").getAsString());
-					}
+			Backend backend = null;
+			JsonObject keys = Client.getConfig(this.getClass().getCanonicalName()).getAsJsonObject("keys");
+			
+			if (args.get(0).equalsIgnoreCase("def")) {
+				backend = new WordNetBackend(
+						keys.get("wordnet").getAsString());
+			} else if (args.get(0).equalsIgnoreCase("ud")) {
+				backend = new UrbanBackend(
+						keys.get("urbandictionary").getAsString());
+			}
 
-					List<String> list = backend.getDefinition(word, amount);
-					
-					if (list.size() > 0) {
-						list.forEach(msg -> event.getChannel().send().message(Helper.truncate(msg,150)));
+			List<String> list = backend.getDefinition(word, amount);
+			
+			if (list.size() > 0) {
+				list.forEach(msg -> event.getChannel().send().message(Helper.truncate(msg,150)));
 
-						event.getChannel().send().message(backend.getFooter(word));
-					} else {
-						event.getChannel()
-								.send()
-								.message(
-										new BoldText(String.format(
-												"Error: no definitions found for %s",
-												word)).toString());
-					}
-				}
-			};
-			async.start();
+				event.getChannel().send().message(backend.getFooter(word));
+			} else {
+				event.getChannel()
+						.send()
+						.message(
+								new BoldText(String.format(
+										"Error: no definitions found for %s",
+										word)).toString());
+			}
+		
 		}
 	}
 

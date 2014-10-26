@@ -11,6 +11,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
+import org.pircbotx.Channel;
 import org.pircbotx.PircBotX;
 import org.pircbotx.hooks.ListenerAdapter;
 import org.pircbotx.hooks.events.MessageEvent;
@@ -19,7 +20,7 @@ import de.kuschku.ircbot.Client;
 
 public class WolframAlphaHandler extends ListenerAdapter<PircBotX> {
 
-	static String URL = "http://api.wolframalpha.com/v2/query?parsetimeout=1&scantimeout=2&format=plaintext&appid=%key&async=true&input=%query";
+	static String URL = "http://api.wolframalpha.com/v2/query?parsetimeout=1&scantimeout=2&podtimeout=4&format=plaintext&appid=%key&async=true&input=%query";
 	static final String ERROR_NO_RESULTS = "WolframAlpha returned no results";
 	static final String ERROR_CRASH = "Request returned an unknown error";
 	static final String[] INCLUDED_PODS = new String[] {
@@ -50,16 +51,18 @@ public class WolframAlphaHandler extends ListenerAdapter<PircBotX> {
 	@Override
 	public void onMessage(MessageEvent<PircBotX> event) throws Exception {
 		if(event.getMessage().toLowerCase().startsWith("!wa ")) {
+			final Channel channel = event.getChannel();
 			Thread async = new Thread() {
 				@Override
 				public void run() {
 					String result = executeAction(event.getMessage()).trim();
 					if (result.contains("\n")) {
+						System.out.println("Multiline");
 						for (String line : result.split("\n")) {
 							event.getChannel().send().message(line);
 						}
 					} else {
-						event.getChannel().send().message(result);
+						channel.send().message(result);
 					}
 				}
 			};
@@ -70,27 +73,34 @@ public class WolframAlphaHandler extends ListenerAdapter<PircBotX> {
 	public String executeAction(String input) {
 		String args = input.substring("!wa ".length());			
 		String request = args.trim();
-			
+		String result = ERROR_NO_RESULTS;
+		
 		try {
 			Document doc = getResults(request);
-			List<Element> answers = parseData(doc);
-			String message = formatResults(answers).orElse(ERROR_NO_RESULTS);
-			
-			return message;
+			Optional<List<Element>> answers = parseData(doc);
+			if (answers.isPresent()) {
+				Optional<String> message = formatResults(answers.get());
+				if (message.isPresent())
+					result = message.get();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			return ERROR_CRASH;
+			result = ERROR_CRASH;
 		}
+		return result;
 	}
 
 	final Document getResults(String request) throws IOException {
 		String resourceUrl = URL.replaceAll("%query",URLEncoder.encode(request,"UTF-8")).replaceAll("%key", key);
-		return Jsoup.connect(resourceUrl).followRedirects(true).timeout(5000).parser(Parser.xmlParser()).get();
+		return Jsoup.connect(resourceUrl).followRedirects(true).timeout(8000).parser(Parser.xmlParser()).get();
 	}
 	
-	final List<Element> parseData(Document data) {
-		Elements results = data.select("pod").get(0).select("plaintext");
-		return results.stream().collect(Collectors.toList());
+	final Optional<List<Element>> parseData(Document data) {
+		Elements results = data.select("pod");
+		if (results.size()>0)
+			return Optional.of(results.get(0).select("plaintext").stream().collect(Collectors.toList()));
+		else
+			return Optional.empty();
 	}
 	
 	final Optional<String> formatResults(List<Element> answers) {

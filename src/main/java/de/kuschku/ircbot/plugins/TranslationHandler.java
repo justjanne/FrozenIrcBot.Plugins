@@ -32,17 +32,11 @@ public class TranslationHandler extends ListenerAdapter<PircBotX> {
 	@Override
 	public void onMessage(MessageEvent<PircBotX> event) throws Exception {
 		if(event.getMessage().toLowerCase().startsWith("!trans ") || event.getMessage().toLowerCase().startsWith("!trans:") ) {
-			Thread async = new Thread() {
-				@Override
-				public void run() {
-					try {
-						event.getChannel().send().message(executeAction(event.getMessage()));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			};
-			async.start();
+			try {
+				event.getChannel().send().message(executeAction(event.getMessage()));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

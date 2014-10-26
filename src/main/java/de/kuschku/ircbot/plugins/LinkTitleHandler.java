@@ -31,9 +31,9 @@ public class LinkTitleHandler extends ListenerAdapter<PircBotX> {
 	static final String regexURL = "(((http|https|spdy)\\:\\/\\/){1}\\S+)";
 	static final Pattern patternURL = Pattern.compile(regexURL);
 
-	static final String formatData(JsonObject data) {
+	static final Optional<String> formatData(JsonObject data) {
 		if (data==null || data.toString().trim().equalsIgnoreCase(""))
-			return null;
+			return Optional.empty();
 		
 		DecimalFormat formatter = (DecimalFormat) NumberFormat
 				.getInstance(Locale.US);
@@ -45,12 +45,12 @@ public class LinkTitleHandler extends ListenerAdapter<PircBotX> {
 				new BoldText(StringEscapeUtils.unescapeHtml4(data.get("title").getAsString())).toString()
 			).replaceAll(
 				"%duration",
-				nicetime(data.get("duration").getAsString())
+				nicetime(data.get("duration").getAsString()).orElse(data.get("duration").getAsString())
 			).replaceAll(
 				"%views",
 				formatter.format(data.get("viewCount").getAsInt())
 			);
-		return result;
+		return Optional.of(result);
 	}
 
 	static final JsonObject getData(String id) throws MalformedURLException,
@@ -121,9 +121,9 @@ public class LinkTitleHandler extends ListenerAdapter<PircBotX> {
 	    }
 	}
 
-	public static String nicetime(String time) {
+	public static Optional<String> nicetime(String time) {
 		if (time==null || time.trim().equalsIgnoreCase(""))
-			return null;
+			return Optional.empty();
 		
 		final long l = Long.valueOf(time) * 1000;
 
@@ -133,15 +133,15 @@ public class LinkTitleHandler extends ListenerAdapter<PircBotX> {
 		final long sec = TimeUnit.MILLISECONDS.toSeconds(l
 				- TimeUnit.HOURS.toMillis(hr) - TimeUnit.MINUTES.toMillis(min));
 		if (l > 3600000) {
-			return String.format("%02d:%02d:%02d", hr, min, sec);
+			return Optional.of(String.format("%02d:%02d:%02d", hr, min, sec));
 		} else {
-			return String.format("%02d:%02d", min, sec);
+			return Optional.of(String.format("%02d:%02d", min, sec));
 		}
 	}
 
 	public static String[] stringToURLList(String input) {
 		if (input==null || input.trim().equalsIgnoreCase(""))
-			return null;
+			return new String[0];
 		
 		List<String> results = new ArrayList<String>();
 
@@ -155,7 +155,7 @@ public class LinkTitleHandler extends ListenerAdapter<PircBotX> {
 	
 	static final Optional<String> executeAction(String input) {
 		try {
-			return Optional.of(formatData(getData(getID(getNiceUrl(getPage(input))))));
+			return formatData(getData(getID(getNiceUrl(getPage(input)))));
 		} catch (IOException e) {
 			e.printStackTrace();
 			return Optional.empty();
